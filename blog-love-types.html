@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>불꽃, 정원, 달빛, 바람 — 나는 어떤 사랑을 하고 있을까? | 러브레이더</title>
+    <meta name="description" content="사람마다 사랑하는 방식이 달라요. 불꽃의 공주, 정원의 공주, 달빛의 공주, 바람의 공주 — 4가지 사랑 유형 중 나는 어디에 해당할까요?">
+    <meta property="og:title" content="불꽃, 정원, 달빛, 바람 — 나는 어떤 사랑을 하고 있을까?">
+    <meta property="og:description" content="4가지 사랑 유형 중 나는 어디에 해당할까요?">
+    <meta property="og:url" content="https://loverader.life/blog/love-types">
+    <meta property="og:type" content="article">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0F0A2A;
+            --bg-card: #1E1545;
+            --bg-gradient-start: #1A1035;
+            --bg-gradient-end: #2D1B69;
+            --text-primary: #F5F0FF;
+            --text-secondary: #A99BC7;
+            --text-disabled: #6B5E82;
+            --card-border: #3D2E6B;
+            --cta: #B8A0E8;
+            --color-fire: #FF8A8A;
+            --color-garden: #7EC9A0;
+            --color-moon: #F5E6A3;
+            --color-wind: #7EB5E8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.9;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .nav {
+            position: sticky; top: 0;
+            background: rgba(15, 10, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 16px 24px; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .nav-logo { font-size: 18px; font-weight: 700; color: var(--cta); text-decoration: none; letter-spacing: -0.5px; }
+        .nav-links a { font-size: 13px; color: var(--text-secondary); text-decoration: none; margin-left: 16px; }
+
+        .hero-blog {
+            background: linear-gradient(180deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            padding: 60px 24px 40px; text-align: center; position: relative; overflow: hidden;
+        }
+
+        .hero-blog::before {
+            content: ''; position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(184, 160, 232, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .blog-tag {
+            display: inline-block; font-size: 12px; font-weight: 500; color: var(--cta);
+            background: rgba(184, 160, 232, 0.15); padding: 4px 14px; border-radius: 20px;
+            margin-bottom: 16px; letter-spacing: 0.5px;
+        }
+
+        .hero-blog h1 { font-size: 26px; font-weight: 700; line-height: 1.4; letter-spacing: -0.5px; margin-bottom: 12px; }
+        .hero-blog .subtitle { font-size: 15px; color: var(--text-secondary); line-height: 1.7; }
+
+        .container { max-width: 640px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .lead {
+            font-size: 16px; color: var(--text-primary); line-height: 2;
+            margin-bottom: 40px; padding-bottom: 40px; border-bottom: 1px solid var(--card-border);
+        }
+
+        h2 { font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 20px; letter-spacing: -0.3px; line-height: 1.4; }
+        p { margin-bottom: 16px; line-height: 2; }
+
+        .type-card {
+            background: var(--bg-card);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 32px 24px;
+            margin: 32px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .type-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+        }
+
+        .type-card.fire::before { background: var(--color-fire); }
+        .type-card.garden::before { background: var(--color-garden); }
+        .type-card.moon::before { background: var(--color-moon); }
+        .type-card.wind::before { background: var(--color-wind); }
+
+        .type-emoji { font-size: 40px; margin-bottom: 16px; display: block; }
+
+        .type-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .type-card.fire .type-name { color: var(--color-fire); }
+        .type-card.garden .type-name { color: var(--color-garden); }
+        .type-card.moon .type-name { color: var(--color-moon); }
+        .type-card.wind .type-name { color: var(--color-wind); }
+
+        .type-attr { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; display: block; }
+
+        .type-desc { font-size: 15px; color: var(--text-primary); line-height: 2; margin-bottom: 20px; }
+
+        .type-signal {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 16px;
+        }
+
+        .signal-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .signal-healthy .signal-label { color: var(--color-garden); }
+        .signal-danger .signal-label { color: #D06070; }
+
+        .signal-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .comparison-section {
+            background: var(--bg-card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 28px 24px;
+            margin: 32px 0;
+        }
+
+        .comparison-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--cta);
+        }
+
+        .comparison-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .comparison-label {
+            flex-shrink: 0;
+            width: 60px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .cta-section {
+            text-align: center; margin-top: 56px; padding: 40px 24px;
+            background: linear-gradient(135deg, rgba(184, 160, 232, 0.1), rgba(30, 21, 69, 0.8));
+            border-radius: 20px; border: 1px solid var(--card-border);
+        }
+
+        .cta-section h2 { font-size: 22px; margin-top: 0; margin-bottom: 12px; }
+        .cta-section p { color: var(--text-secondary); font-size: 15px; margin-bottom: 24px; }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--cta), #9B7FD4);
+            color: white; padding: 14px 36px; border-radius: 50px;
+            text-decoration: none; font-size: 15px; font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(184, 160, 232, 0.3);
+        }
+
+        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(184, 160, 232, 0.4); }
+
+        .footer {
+            text-align: center; padding: 32px 24px;
+            border-top: 1px solid var(--card-border); margin-top: 56px;
+        }
+        .footer-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 12px; }
+        .footer-links a { font-size: 13px; color: var(--text-disabled); text-decoration: none; }
+        .footer-copy { font-size: 12px; color: var(--text-disabled); }
+
+        @media (max-width: 480px) {
+            .hero-blog h1 { font-size: 22px; }
+            .container { padding: 32px 20px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-logo">러브레이더</a>
+        <div class="nav-links"><a href="/">홈</a><a href="/about.html">소개</a><a href="/privacy.html">개인정보</a></div>
+    </nav>
+
+    <section class="hero-blog">
+        <span class="blog-tag">LOVE TYPES</span>
+        <h1>불꽃, 정원, 달빛, 바람<br>나는 어떤 사랑을 하고 있을까?</h1>
+        <p class="subtitle">같은 "사랑"이어도, 표현하는 방식은 사람마다 달라요.</p>
+    </section>
+
+    <div class="container">
+        <p class="lead">
+            "나는 남자친구를 분명히 좋아하는데, 왜 이렇게 표현을 못 할까?" 혹은 "왜 나만 이렇게 집착하는 것 같지?" 이런 생각을 해본 적 있나요? 그건 사랑이 부족해서가 아니라, 사랑하는 방식이 다르기 때문이에요. 러브레이더는 사랑의 방식을 4가지 유형으로 나눠요. 어떤 게 더 좋고 나쁜 게 아니라, 각자의 사랑 언어가 다른 거예요.
+        </p>
+
+        <!-- 불꽃의 공주 -->
+        <div class="type-card fire">
+            <span class="type-emoji">🔥</span>
+            <div class="type-name">불꽃의 공주</div>
+            <span class="type-attr">표현형</span>
+            <p class="type-desc">
+                사랑하면 온 세상이 알게 되는 사람이에요. 좋으면 좋다고, 보고 싶으면 보고 싶다고, 감정이 올라오면 그대로 밖으로 나와요. 남자친구에게 먼저 "보고 싶어"라고 말하는 게 자연스럽고, 스킨십도 적극적이고, 선물이나 편지 같은 걸로 마음을 전하는 걸 좋아해요.
+            </p>
+            <p class="type-desc">
+                이 유형은 표현 자체가 사랑의 증거예요. 그래서 "요즘 왜 표현을 안 하지?"가 아니라, "표현하고 싶은 마음 자체가 올라오는가?"를 봐야 해요.
+            </p>
+            <div class="type-signal signal-healthy">
+                <span class="signal-label">✨ 건강한 상태</span>
+                <span class="signal-text">표현하고 싶은 마음이 자연스럽게 올라와요. 누가 시키지 않아도.</span>
+            </div>
+            <div class="type-signal signal-danger" style="margin-top: 8px;">
+                <span class="signal-label">⚠️ 위험 신호</span>
+                <span class="signal-text">표현이 줄어든 게 아니라, 하고 싶은 마음 자체가 안 올라올 때.</span>
+            </div>
+        </div>
+
+        <!-- 정원의 공주 -->
+        <div class="type-card garden">
+            <span class="type-emoji">🌱</span>
+            <div class="type-name">정원의 공주</div>
+            <span class="type-attr">헌신형</span>
+            <p class="type-desc">
+                사랑하는 사람의 세상을 가꿔주는 사람이에요. 말보다 손이 먼저 나가요. 남자친구가 아프면 약 사서 달려가고, 귀찮아도 데리러 나가고, 좋은 거 보면 "이거 우리 남자친구가 좋아할 것 같은데" 하면서 사와요.
+            </p>
+            <p class="type-desc">
+                이 유형은 "해주는 것"이 사랑의 언어예요. 그래서 중요한 건 "해주고 있느냐"가 아니라, "해줄 때 어떤 마음이냐"예요. 기쁜 마음으로 하고 있다면 건강한 거고, 의무감으로 하고 있다면 그건 신호예요.
+            </p>
+            <div class="type-signal signal-healthy">
+                <span class="signal-label">✨ 건강한 상태</span>
+                <span class="signal-text">챙겨주는 게 기뻐요. 상대가 편해하는 걸 보면 뿌듯해요.</span>
+            </div>
+            <div class="type-signal signal-danger" style="margin-top: 8px;">
+                <span class="signal-label">⚠️ 위험 신호</span>
+                <span class="signal-text">"해줘야 하니까" 의무감으로 움직이고 있을 때.</span>
+            </div>
+        </div>
+
+        <!-- 달빛의 공주 -->
+        <div class="type-card moon">
+            <span class="type-emoji">🌙</span>
+            <div class="type-name">달빛의 공주</div>
+            <span class="type-attr">내면형</span>
+            <p class="type-desc">
+                사랑이 깊은데 밖에서는 잘 안 보이는 사람이에요. 혼자 남자친구 생각을 오래 하고, 같이 있을 때는 말보다 분위기로 느끼고, 깊은 대화 한 번이 매일 연락보다 소중한 타입이에요.
+            </p>
+            <p class="type-desc">
+                이 유형이 가장 오해받기 쉬워요. "만나기 귀찮다"가 이 유형에서는 기본값일 수 있거든요. 그래서 행동 빈도로 사랑을 측정하면 불공정해요. "내면에서 뭐가 일어나고 있느냐"를 봐야 해요.
+            </p>
+            <div class="type-signal signal-healthy">
+                <span class="signal-label">✨ 건강한 상태</span>
+                <span class="signal-text">혼자 있어도 남자친구 생각이 자연스럽게 스며들어요.</span>
+            </div>
+            <div class="type-signal signal-danger" style="margin-top: 8px;">
+                <span class="signal-label">⚠️ 위험 신호</span>
+                <span class="signal-text">만나기 귀찮은 게 아니라 (그건 원래 그래요), 혼자 있을 때 생각 자체가 안 날 때.</span>
+            </div>
+        </div>
+
+        <!-- 바람의 공주 -->
+        <div class="type-card wind">
+            <span class="type-emoji">🌬️</span>
+            <div class="type-name">바람의 공주</div>
+            <span class="type-attr">독립형</span>
+            <p class="type-desc">
+                자기 왕국이 확실한 사람이에요. 사랑해도 자기 영역은 지키고, 각자의 시간이 있어야 오히려 만남이 소중해지는 타입이에요. 매일 붙어있는 건 답답하고, 남자친구가 내 세계에 자연스럽게 들어와 있다는 것 자체가 엄청난 허락이에요.
+            </p>
+            <p class="type-desc">
+                이 유형에서 "거리를 두는 것"은 무관심이 아니에요. 오히려 그게 사랑하는 방식이에요. 위험 신호는 거리를 두는 게 아니라, 상대가 다가와도 아무 감정이 안 드는 것이에요.
+            </p>
+            <div class="type-signal signal-healthy">
+                <span class="signal-label">✨ 건강한 상태</span>
+                <span class="signal-text">남자친구가 내 영역에 있어도 편안하고, 오히려 반가워요.</span>
+            </div>
+            <div class="type-signal signal-danger" style="margin-top: 8px;">
+                <span class="signal-label">⚠️ 위험 신호</span>
+                <span class="signal-text">거리를 두는 게 아니라 (그건 원래 그래요), 다가와도 아무 감정이 안 들 때.</span>
+            </div>
+        </div>
+
+        <h2>왜 유형을 아는 게 중요할까?</h2>
+        <p>
+            같은 "부재 반응"(못 만남에 대한 반응)이어도, 유형마다 건강한 사랑의 모습이 완전히 달라요.
+        </p>
+
+        <div class="comparison-section">
+            <h3>같은 "못 만남"에 대한 반응, 유형마다 다른 건강한 사랑</h3>
+            <div class="comparison-row">
+                <span class="comparison-label" style="color: var(--color-fire);">🔥 불꽃</span>
+                <span>"보고 싶지만 연락하면서 버티는 중" — 감정을 표현하면서 견디는 게 이 유형의 건강한 그리움</span>
+            </div>
+            <div class="comparison-row">
+                <span class="comparison-label" style="color: var(--color-garden);">🌱 정원</span>
+                <span>"해주고 싶은데 못 해줘서 답답" — 돌봄 충동이 살아있는 게 이 유형의 건강한 그리움</span>
+            </div>
+            <div class="comparison-row">
+                <span class="comparison-label" style="color: var(--color-moon);">🌙 달빛</span>
+                <span>"만나고 싶긴 한데 혼자 시간도 필요해서 복잡" — 복합 감정이 이 유형의 건강한 그리움</span>
+            </div>
+            <div class="comparison-row">
+                <span class="comparison-label" style="color: var(--color-wind);">🌬️ 바람</span>
+                <span>"문득 한번 볼까 생각이 듦" — 문득 떠오르는 것 자체가 이 유형의 건강한 그리움</span>
+            </div>
+        </div>
+
+        <p>
+            전부 "사랑이 있는 상태"인데, 모양이 완전히 달라요. 그래서 하나의 잣대로 "이게 사랑이냐 아니냐"를 판단하면 불공정해요. 나의 유형을 알아야, 나의 사랑을 제대로 측정할 수 있어요.
+        </p>
+
+        <div class="cta-section">
+            <h2>나는 어떤 공주일까?</h2>
+            <p>나의 사랑 유형을 선택하고,<br>그 유형에 맞춘 맞춤 진단을 받아보세요.</p>
+            <a href="/" class="cta-button">러브레이더 테스트 시작하기</a>
+        </div>
+
+        <div class="footer">
+            <div class="footer-links">
+                <a href="/">홈</a>
+                <a href="/about.html">서비스 소개</a>
+                <a href="/privacy.html">개인정보처리방침</a>
+                <a href="/terms.html">이용약관</a>
+            </div>
+            <p class="footer-copy">&copy; 2025 러브레이더. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
