@@ -54,7 +54,7 @@ const TYPES = [
   { id: "fire", emoji: "🔥", name: "불꽃", attr: "표현형", color: "#FF8A8A", desc: "사랑하면 온 세상이 알게 되는 사람. 좋으면 좋다고, 보고 싶으면 보고 싶다고. 감정이 올라오면 그대로 밖으로.", healthy: "표현하고 싶은 마음이 자연스럽게 올라와요.", danger: "하고 싶은 마음 자체가 안 올라올 때." },
   { id: "tree", emoji: "🌱", name: "나무", attr: "헌신형", color: "#7EC9A0", desc: "사랑하는 사람의 세상을 가꿔주는 사람. 말보다 손이 먼저 나가. 해주는 게 기쁜 사랑.", healthy: "챙겨주는 게 기뻐요. 상대가 편해하면 뿌듯해요.", danger: "\"해줘야 하니까\" 의무감으로 움직일 때." },
   { id: "moon", emoji: "🌙", name: "달빛", attr: "내면형", color: "#F5E6A3", desc: "사랑이 깊은데 밖에서는 잘 안 보이는 사람. 조용히, 혼자, 오래 생각하는 사람.", healthy: "혼자 있어도 생각이 자연스럽게 스며들어요.", danger: "혼자 있을 때 생각 자체가 안 날 때." },
-  { id: "wind", emoji: "🌬️", name: "바람", attr: "독립형", color: "#7EB5E8", desc: "자기 영역이 확실한 사람. 각자의 시간이 있어야 만남이 소중해지는 사람.", healthy: "내 영역에 있어도 편안하고 반가워요.", danger: "다가와도 아무 감정이 안 들 때." }
+  { id: "wind", emoji: "🌬️", name: "바람", attr: "독립형", color: "#7EB5E8", desc: "자기 왕국이 확실한 사람. 각자의 시간이 있어야 만남이 소중해지는 사람.", healthy: "내 영역에 있어도 편안하고 반가워요.", danger: "다가와도 아무 감정이 안 들 때." }
 ];
 
 // 불꽃 type questions - {period} will be replaced dynamically
@@ -585,32 +585,42 @@ function LoveRadar() {
         const payload = {
           timestamp: new Date().toISOString(),
           email: email || "(건너뜀)",
-          // Phase 0
           만남주기: p0.frequency || "",
           연애기간: p0.duration || "",
           바쁜정도: p0.busy || "",
           다툼빈도: p0.conflict || "",
-          // Phase 1
           유형: selType,
-          // Phase 2 개별 응답
           Q1: p2Ans.q1 != null ? p2Ans.q1 : "", Q2: p2Ans.q2 != null ? p2Ans.q2 : "", Q3: p2Ans.q3 != null ? p2Ans.q3 : "",
           Q4: p2Ans.q4 != null ? p2Ans.q4 : "", Q5: p2Ans.q5 != null ? p2Ans.q5 : "", Q6: p2Ans.q6 != null ? p2Ans.q6 : "",
           Q7: p2Ans.q7 != null ? p2Ans.q7 : "", Q8: p2Ans.q8 != null ? p2Ans.q8 : "", Q9: p2Ans.q9 != null ? p2Ans.q9 : "",
           Q10: p2Ans.q10 != null ? p2Ans.q10 : "", Q11: p2Ans.q11 != null ? p2Ans.q11 : "", Q12: p2Ans.q12 != null ? p2Ans.q12 : "",
-          // Phase 3 개별 응답
           D1: p3Ans.d1 || "", D2: p3Ans.d2 || "", D3: p3Ans.d3 || "",
           D4: p3Ans.d4 || "", D5: p3Ans.d5 || "",
-          // 결과
           사랑온도: scores.total,
           ...areaScores,
           감별결과: getDiagLabel(diag),
           보정코멘트: boost || ""
         };
-        fetch(sheetUrl, {
-          method: "POST", mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        }).catch(() => {});
+        try {
+          var iframe = document.createElement("iframe");
+          iframe.name = "lr_submit";
+          iframe.style.display = "none";
+          document.body.appendChild(iframe);
+          var form = document.createElement("form");
+          form.method = "POST";
+          form.action = sheetUrl;
+          form.target = "lr_submit";
+          var input = document.createElement("input");
+          input.type = "hidden";
+          input.name = "payload";
+          input.value = JSON.stringify(payload);
+          form.appendChild(input);
+          document.body.appendChild(form);
+          form.submit();
+          setTimeout(function() {
+            try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
+          }, 3000);
+        } catch(e) {}
       }
 
       setResults({ scores, diag, boost });
