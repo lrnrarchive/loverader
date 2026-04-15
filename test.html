@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>러브레이더 | 지금 나의 사랑은 어디쯤에 있을까?</title>
-    <meta name="description" content="나의 사랑 유형을 알고, 지금 관계의 온도를 확인해보세요. 권태기인지, 사랑이 식은 건지, 단순 피로인지 러브레이더가 알려드릴게요.">
+    <meta name="description" content="나의 사랑 유형을 알고, 지금 관계의 온도를 확인해보세요.">
     <meta property="og:title" content="러브레이더 | 지금 나의 사랑은 어디쯤에 있을까?">
     <meta property="og:description" content="나의 사랑 유형을 알고, 지금 관계의 온도를 확인해보세요.">
-    <meta property="og:url" content="https://loverader.life">
+    <meta property="og:url" content="https://loverader.life/test.html">
     <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body, #root { min-height: 100vh; background: #0F0A2A; }
@@ -22,9 +23,12 @@
 </head>
 <body>
     <div id="root"></div>
+    <script>
+        // Google Sheets URL - replace with your own Apps Script URL
+        window.LOVERADAR_SHEET_URL = "https://script.google.com/macros/s/AKfycbxUmViC6KB_kRrN6XlIf2h6FwMx0x8JyWlx0EBQjejT6HoS0GMjplQSRpGIR3HAycU/exec";
+    </script>
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-
 
 
 // ═══════════════════════════════════════
@@ -50,7 +54,7 @@ const TYPES = [
   { id: "fire", emoji: "🔥", name: "불꽃", attr: "표현형", color: "#FF8A8A", desc: "사랑하면 온 세상이 알게 되는 사람. 좋으면 좋다고, 보고 싶으면 보고 싶다고. 감정이 올라오면 그대로 밖으로.", healthy: "표현하고 싶은 마음이 자연스럽게 올라와요.", danger: "하고 싶은 마음 자체가 안 올라올 때." },
   { id: "tree", emoji: "🌱", name: "나무", attr: "헌신형", color: "#7EC9A0", desc: "사랑하는 사람의 세상을 가꿔주는 사람. 말보다 손이 먼저 나가. 해주는 게 기쁜 사랑.", healthy: "챙겨주는 게 기뻐요. 상대가 편해하면 뿌듯해요.", danger: "\"해줘야 하니까\" 의무감으로 움직일 때." },
   { id: "moon", emoji: "🌙", name: "달빛", attr: "내면형", color: "#F5E6A3", desc: "사랑이 깊은데 밖에서는 잘 안 보이는 사람. 조용히, 혼자, 오래 생각하는 사람.", healthy: "혼자 있어도 생각이 자연스럽게 스며들어요.", danger: "혼자 있을 때 생각 자체가 안 날 때." },
-  { id: "wind", emoji: "🌬️", name: "바람", attr: "독립형", color: "#7EB5E8", desc: "자기 왕국이 확실한 사람. 각자의 시간이 있어야 만남이 소중해지는 사람.", healthy: "내 영역에 있어도 편안하고 반가워요.", danger: "다가와도 아무 감정이 안 들 때." }
+  { id: "wind", emoji: "🌬️", name: "바람", attr: "독립형", color: "#7EB5E8", desc: "자기 영역이 확실한 사람. 각자의 시간이 있어야 만남이 소중해지는 사람.", healthy: "내 영역에 있어도 편안하고 반가워요.", danger: "다가와도 아무 감정이 안 들 때." }
 ];
 
 // 불꽃 type questions - {period} will be replaced dynamically
@@ -141,10 +145,8 @@ const AREA_CONFIG = [
 function calcScores(answers) {
   const areas = AREA_CONFIG.map(a => {
     const raw = a.qs.reduce((sum, qid) => sum + (answers[qid] || 0), 0);
-    // More generous: boost by 1.2x with a floor of 20% of max
-    const base = (raw / a.maxRaw) * a.maxScaled;
-    const boosted = Math.min(base * 1.2 + a.maxScaled * 0.08, a.maxScaled);
-    const scaled = Math.round(boosted * 10) / 10;
+    // Realistic scoring: straight proportional, no boost
+    const scaled = Math.round((raw / a.maxRaw) * a.maxScaled * 10) / 10;
     return { ...a, raw, scaled, pct: Math.round((scaled / a.maxScaled) * 100) };
   });
   const total = Math.min(Math.round(areas.reduce((s, a) => s + a.scaled, 0)), 100);
@@ -152,38 +154,32 @@ function calcScores(answers) {
 }
 
 function calcDiagnosis(diagAnswers, totalScore) {
-  // 사랑 온도 90 이상이면 무조건 건강한 안정기
-  if (totalScore >= 90) return "stable";
+  // 사랑 온도 85 이상이면 무조건 건강한 안정기
+  if (totalScore >= 85) return "stable";
 
   const counts = { boredom: 0, faded: 0, fatigue: 0, stable: 0 };
   Object.values(diagAnswers).forEach(v => { if (counts[v] !== undefined) counts[v]++; });
-  // Weight D1 and D2 more
   const d1 = diagAnswers.d1, d2 = diagAnswers.d2;
   if (d1) counts[d1] += 0.5;
   if (d2) counts[d2] += 0.5;
 
-  // Love score integration
-  if (totalScore >= 75) {
-    // 75~89: 안정기 강하게 밀어줌, 식음은 거의 불가
-    counts.stable += 4;
-    counts.boredom -= 2;
-    counts.faded -= 4;
-    counts.fatigue -= 1;
-  } else if (totalScore >= 60) {
-    // 60~74: 피로/권태기까지는 가능하되, 식음은 제한
-    counts.stable += 1.5;
-    counts.faded -= 2;
-  } else if (totalScore >= 45) {
-    // 45~59: Phase 3 주도, 약간 보정만
+  // Love score integration - 70+ biases stable
+  if (totalScore >= 70) {
+    counts.stable += 3;
+    counts.boredom -= 1;
+    counts.faded -= 3;
+    counts.fatigue -= 0.5;
+  } else if (totalScore >= 55) {
+    counts.stable += 1;
+    counts.faded -= 1.5;
+  } else if (totalScore >= 40) {
+    // Phase 3 leads, slight faded brake
     counts.faded -= 0.5;
   } else {
-    // 44 이하: Phase 3 완전 주도 + 식음 가능성 열림
     counts.faded += 1;
   }
 
-  // Prevent negative
   Object.keys(counts).forEach(k => { if (counts[k] < 0) counts[k] = 0; });
-
   const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
   return sorted[0][0];
 }
@@ -230,7 +226,7 @@ function getDiagDesc(diag, typeId) {
       stable: "축하해요! 각자의 시간도 즐기면서, 애인이 내 세계 안에 자연스럽게 있어요. 바람 유형의 사랑이 가장 건강한 상태예요."
     }
   };
-  return typeDescs[typeId]?.[diag] || "";
+  return (typeDescs[typeId] || {})[diag] || "";
 }
 
 function getBoostComment(p0, diag) {
@@ -320,11 +316,41 @@ function LoveRadar() {
   const [results, setResults] = useState(null);
   const [fade, setFade] = useState(true);
   const [openTip, setOpenTip] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [email, setEmail] = useState("");
+  const cardRef = useRef(null);
 
   const transition = (fn) => {
     setFade(false);
     setTimeout(() => { fn(); setFade(true); }, 250);
   };
+
+  const goBack = () => {
+    transition(() => {
+      if (phase === "p0") {
+        if (step > 0) setStep(step - 1);
+        else setPhase("start");
+      } else if (phase === "p1") {
+        setStep(PHASE0.length - 1);
+        setPhase("p0");
+      } else if (phase === "p2") {
+        if (step > 0) setStep(step - 1);
+        else { setSelType(null); setPhase("p1"); }
+      } else if (phase === "p3") {
+        if (step > 0) setStep(step - 1);
+        else { const typeQs = TYPE_QS[selType] || FIRE_QS; setStep(typeQs.length - 1); setPhase("p2"); }
+      } else if (phase === "email") {
+        setStep(DIAG_QS.length - 1);
+        setPhase("p3");
+      }
+    });
+  };
+
+  const BackBtn = () => (
+    <button onClick={goBack} style={{ background: "none", border: "none", color: "#6B5E82", fontSize: 14, cursor: "pointer", padding: "8px 0", display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}>
+      ← 이전
+    </button>
+  );
 
   // Get period text for Q7
   const period = PERIOD_MAP[p0.frequency] || "며칠";
@@ -364,6 +390,7 @@ function LoveRadar() {
       <div style={S.wrap}>
         <Stars />
         <div style={{ ...S.inner, opacity: fade ? 1 : 0, transition: "opacity 0.25s" }}>
+          <BackBtn />
           <div style={S.progress}><div style={S.progressFill((step + 1) / PHASE0.length * 100)} /></div>
           <div style={S.content}>
             <div style={S.phaseLabel}>기본 정보 · {step + 1}/{PHASE0.length}</div>
@@ -393,6 +420,7 @@ function LoveRadar() {
         <Stars />
         <div style={{ ...S.inner, opacity: fade ? 1 : 0, transition: "opacity 0.25s" }}>
           <div style={{ ...S.content, justifyContent: "flex-start", paddingTop: 32 }}>
+            <BackBtn />
             <div style={S.phaseLabel}>나의 사랑 유형</div>
             <div style={{ ...S.question, marginBottom: 8 }}>당신은 어떤 유형인가요?</div>
             <p style={{ fontSize: 14, color: "#A99BC7", marginBottom: 24, lineHeight: 1.7 }}>가장 가까운 유형을 선택해주세요.</p>
@@ -409,7 +437,7 @@ function LoveRadar() {
               </div>
             ))}
             {selType && (
-              <button style={S.cta(TYPES.find(t => t.id === selType)?.color)} onClick={() => {
+              <button style={S.cta((TYPES.find(t => t.id === selType) || {}).color)} onClick={() => {
                 transition(() => { setStep(0); setPhase("p2"); });
               }}>
                 선택 완료
@@ -425,11 +453,12 @@ function LoveRadar() {
   if (phase === "p2") {
     const typeQs = TYPE_QS[selType] || FIRE_QS;
     const cur = typeQs[step];
-    const typeColor = TYPES.find(t => t.id === selType)?.color || "#FF8A8A";
+    const typeColor = (TYPES.find(t => t.id === selType) || {}).color || "#FF8A8A";
     return (
       <div style={S.wrap}>
         <Stars />
         <div style={{ ...S.inner, opacity: fade ? 1 : 0, transition: "opacity 0.25s" }}>
+          <BackBtn />
           <div style={S.progress}><div style={S.progressFill((step + 1) / typeQs.length * 100, typeColor)} /></div>
           <div style={S.content}>
             <div style={S.phaseLabel}>{cur.area} · {step + 1}/{typeQs.length}</div>
@@ -461,6 +490,7 @@ function LoveRadar() {
       <div style={S.wrap}>
         <Stars />
         <div style={{ ...S.inner, opacity: fade ? 1 : 0, transition: "opacity 0.25s" }}>
+          <BackBtn />
           <div style={S.progress}><div style={S.progressFill((step + 1) / DIAG_QS.length * 100, "#B8A0E8")} /></div>
           <div style={S.content}>
             <div style={S.phaseLabel}>마지막 질문 · {step + 1}/{DIAG_QS.length}</div>
@@ -474,11 +504,66 @@ function LoveRadar() {
                 setTimeout(() => {
                   transition(() => {
                     if (step < DIAG_QS.length - 1) setStep(step + 1);
-                    else { setPhase("loading"); }
+                    else { setPhase("email"); }
                   });
                 }, 200);
               }}>{label}</button>
             ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── EMAIL COLLECTION ──
+  if (phase === "email") {
+    const isValid = email.includes("@") && email.includes(".");
+    return (
+      <div style={S.wrap}>
+        <Stars />
+        <div style={{ ...S.inner, opacity: fade ? 1 : 0, transition: "opacity 0.25s" }}>
+          <div style={{ ...S.content, textAlign: "center" }}>
+            <div style={{ textAlign: "left" }}><BackBtn /></div>
+            <div style={{ fontSize: 48, marginBottom: 20 }}>✉️</div>
+            <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>거의 다 왔어요!</div>
+            <p style={{ fontSize: 14, color: "#A99BC7", lineHeight: 1.8, marginBottom: 32 }}>
+              결과를 확인하기 전에,<br />이메일을 입력해주세요.<br />
+              <span style={{ fontSize: 12, color: "#6B5E82" }}>맞춤 리포트와 연애 꿀팁을 보내드릴게요.</span>
+            </p>
+            <input
+              type="email"
+              placeholder="이메일 주소 입력"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              style={{
+                width: "100%", padding: "14px 18px", background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12,
+                color: "#F5F0FF", fontSize: 15, outline: "none", marginBottom: 16,
+                fontFamily: "'Noto Sans KR', sans-serif"
+              }}
+              onFocus={e => e.target.style.borderColor = "#B8A0E8"}
+              onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+            />
+            <button
+              disabled={!isValid}
+              style={{
+                ...S.cta("#B8A0E8"),
+                opacity: isValid ? 1 : 0.4,
+                cursor: isValid ? "pointer" : "not-allowed"
+              }}
+              onClick={() => {
+                if (!isValid) return;
+                setPhase("loading");
+              }}
+            >
+              결과 확인하기
+            </button>
+            <button
+              onClick={() => setPhase("loading")}
+              style={{ background: "none", border: "none", color: "#6B5E82", fontSize: 13, marginTop: 12, cursor: "pointer", padding: 8 }}
+            >
+              건너뛰기
+            </button>
           </div>
         </div>
       </div>
@@ -491,6 +576,43 @@ function LoveRadar() {
       const scores = calcScores(p2Ans);
       const diag = calcDiagnosis(p3Ans, scores.total);
       const boost = getBoostComment(p0, diag);
+
+      // Submit full data to Google Sheets
+      const sheetUrl = window.LOVERADAR_SHEET_URL;
+      if (sheetUrl) {
+        const areaScores = {};
+        scores.areas.forEach(a => { areaScores[a.label] = Math.round(a.scaled) + "/" + a.maxScaled; });
+        const payload = {
+          timestamp: new Date().toISOString(),
+          email: email || "(건너뜀)",
+          // Phase 0
+          만남주기: p0.frequency || "",
+          연애기간: p0.duration || "",
+          바쁜정도: p0.busy || "",
+          다툼빈도: p0.conflict || "",
+          // Phase 1
+          유형: selType,
+          // Phase 2 개별 응답
+          Q1: p2Ans.q1 != null ? p2Ans.q1 : "", Q2: p2Ans.q2 != null ? p2Ans.q2 : "", Q3: p2Ans.q3 != null ? p2Ans.q3 : "",
+          Q4: p2Ans.q4 != null ? p2Ans.q4 : "", Q5: p2Ans.q5 != null ? p2Ans.q5 : "", Q6: p2Ans.q6 != null ? p2Ans.q6 : "",
+          Q7: p2Ans.q7 != null ? p2Ans.q7 : "", Q8: p2Ans.q8 != null ? p2Ans.q8 : "", Q9: p2Ans.q9 != null ? p2Ans.q9 : "",
+          Q10: p2Ans.q10 != null ? p2Ans.q10 : "", Q11: p2Ans.q11 != null ? p2Ans.q11 : "", Q12: p2Ans.q12 != null ? p2Ans.q12 : "",
+          // Phase 3 개별 응답
+          D1: p3Ans.d1 || "", D2: p3Ans.d2 || "", D3: p3Ans.d3 || "",
+          D4: p3Ans.d4 || "", D5: p3Ans.d5 || "",
+          // 결과
+          사랑온도: scores.total,
+          ...areaScores,
+          감별결과: getDiagLabel(diag),
+          보정코멘트: boost || ""
+        };
+        fetch(sheetUrl, {
+          method: "POST", mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).catch(() => {});
+      }
+
       setResults({ scores, diag, boost });
       setPhase("result");
     }, 2500);
@@ -524,25 +646,51 @@ function LoveRadar() {
       <div style={S.wrap}>
         <Stars />
         <div style={{ ...S.inner, paddingTop: 32, paddingBottom: 60, position: "relative", zIndex: 1 }}>
-          {/* Header */}
-          <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <span style={{ fontSize: 48, display: "block", marginBottom: 12 }}>{typeData.emoji}</span>
-            <div style={{ fontSize: 24, fontWeight: 700, color: typeData.color, marginBottom: 4 }}>{typeData.name}</div>
-            <div style={{ fontSize: 13, color: "#A99BC7" }}>{typeData.attr}</div>
-          </div>
-
-          {/* Score */}
-          <div style={{ textAlign: "center", marginBottom: 32, padding: "32px 0", background: "rgba(255,255,255,0.03)", borderRadius: 20, border: "1px solid rgba(255,255,255,0.06)" }}>
-            <div style={{ fontSize: 13, color: "#A99BC7", marginBottom: 8, letterSpacing: 1 }}>사랑 온도</div>
-            <div style={{ fontSize: 56, fontWeight: 700, color: "#F5F0FF", lineHeight: 1 }}>
-              <AnimNum target={scores.total} />
-              <span style={{ fontSize: 24, color: "#A99BC7" }}>/100</span>
+          {/* ═══ Share Card (captured area) ═══ */}
+          <div ref={cardRef} style={{ background: "linear-gradient(180deg, #1A1035, #2D1B69)", borderRadius: 24, padding: "36px 28px 32px", marginBottom: 24 }}>
+            {/* Header */}
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <span style={{ fontSize: 48, display: "block", marginBottom: 12 }}>{typeData.emoji}</span>
+              <div style={{ fontSize: 24, fontWeight: 700, color: typeData.color, marginBottom: 4 }}>{typeData.name}</div>
+              <div style={{ fontSize: 13, color: "#A99BC7" }}>{typeData.attr}</div>
             </div>
+
+            {/* Score */}
+            <div style={{ textAlign: "center", marginBottom: 24, padding: "28px 0", background: "rgba(255,255,255,0.04)", borderRadius: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div style={{ fontSize: 13, color: "#A99BC7", marginBottom: 8, letterSpacing: 1 }}>사랑 온도</div>
+              <div style={{ fontSize: 56, fontWeight: 700, color: "#F5F0FF", lineHeight: 1 }}>
+                <AnimNum target={scores.total} />
+                <span style={{ fontSize: 24, color: "#A99BC7" }}>/100</span>
+              </div>
+            </div>
+
+            {/* Diagnosis Badge */}
+            <div style={{ textAlign: "center", marginBottom: 8 }}>
+              <div style={S.badge(diagColor)}>{diagEmoji} {diagLabel}</div>
+            </div>
+
+            {/* Watermark */}
+            <div style={{ textAlign: "center", fontSize: 11, color: "#6B5E82", marginTop: 12 }}>loverader.life</div>
           </div>
 
-          {/* Diagnosis Badge */}
-          <div style={{ textAlign: "center", marginBottom: 28 }}>
-            <div style={S.badge(diagColor)}>{diagEmoji} {diagLabel}</div>
+          {/* ═══ Share Buttons ═══ */}
+          <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
+            <button onClick={() => {
+              alert("앗~ 아직 기능 출시 전이라 캡쳐를 부탁해요~ 📸");
+            }} style={{ flex: 1, padding: "14px 0", background: `${typeData.color}20`, border: `1px solid ${typeData.color}40`, borderRadius: 12, color: typeData.color, fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "all 0.2s" }}>
+              📸 결과 카드 저장
+            </button>
+            <button onClick={() => {
+              navigator.clipboard.writeText("loverader.life").then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }).catch(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              });
+            }} style={{ flex: 1, padding: "14px 0", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, color: copied ? "#7EC9A0" : "#A99BC7", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "all 0.2s" }}>
+              {copied ? "✅ 복사 완료!" : "🔗 링크 복사"}
+            </button>
           </div>
 
           {/* Area Breakdown */}
@@ -594,11 +742,10 @@ function LoveRadar() {
 
           {/* Share / Restart */}
           <button style={S.cta(typeData.color)} onClick={() => {
-            setPhase("start"); setStep(0); setP0({}); setSelType(null); setP2Ans({}); setP2Sel({}); setP3Ans({}); setP3Sel({}); setResults(null); setOpenTip(null);
+            setPhase("start"); setStep(0); setP0({}); setSelType(null); setP2Ans({}); setP2Sel({}); setP3Ans({}); setP3Sel({}); setResults(null); setOpenTip(null); setCopied(false); setEmail("");
           }}>
             다시 테스트하기
           </button>
-          <p style={{ textAlign: "center", fontSize: 12, color: "#6B5E82", marginTop: 16 }}>loverader.life</p>
         </div>
       </div>
     );
@@ -606,7 +753,6 @@ function LoveRadar() {
 
   return null;
 }
-
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(LoveRadar));
